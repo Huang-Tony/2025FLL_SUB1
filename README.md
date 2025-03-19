@@ -62,6 +62,13 @@ submarine movement works
 # Arduino Documentation
 **MOTOR1** = IN1, IN2
 **MOTOR2** = IN3, IN4
+Motors are **DC** motors:
+  IN1 **LOW** + IN2 **HIGH** 
+    Move Forwards 
+  IN1 **HIGH** + IN2 **LOW**
+    Move Backwards
+  IN1 **LOW** + IN2 **LOW**
+    Stops motor
 
 MOTOR1 activates when sensor goes too much to the left
 
