@@ -6,6 +6,19 @@
 #include <MPU6050.h>
 
 MPU6050 mpu;
+
+// Function to check for "quit" message
+void checkForQuit() {
+  if (Serial.available() > 0) { // Check if data is available to read
+    String message = Serial.readStringUntil('\n'); // Read the incoming message
+    message.trim(); // Remove any extra whitespace or newline characters
+    if (message.equalsIgnoreCase("quit")) { // Check if the message is "quit"
+      Serial.println("Quit command received. Stopping program...");
+      while (true) {} // Stop the program by entering an infinite loop
+    }
+  }
+}
+
 // the setup function runs once when you press reset or power the board
 void setup() {
   // make all motor control pins low
@@ -82,7 +95,7 @@ void loop() {
 //    digitalWrite(IN3, LOW);
 //   digitalWrite(IN4, HIGH);
   // delay(5000);    // wait half a second
-Vector rawAccel = mpu.readRawAccel();
+  Vector rawAccel = mpu.readRawAccel();
   Vector normAccel = mpu.readNormalizeAccel();
 
   Serial.print(" Xraw = ");
@@ -90,16 +103,35 @@ Vector rawAccel = mpu.readRawAccel();
   Serial.print(" Yraw = ");
   Serial.print(rawAccel.YAxis);
   Serial.print(" Zraw = ");
-
   Serial.println(rawAccel.ZAxis);
-  Serial.print(" Xnorm = ");
-  Serial.print(normAccel.XAxis);
-  Serial.print(" Ynorm = ");
-  Serial.print(normAccel.YAxis);
-  Serial.print(" Znorm = ");
-  Serial.println(normAccel.ZAxis);
+  // Serial.print(" Xnorm = ");
+  // Serial.print(normAccel.XAxis);
+  // Serial.print(" Ynorm = ");
+  // Serial.print(normAccel.YAxis);
+  // Serial.print(" Znorm = ");
+  // Serial.println(normAccel.ZAxis);
   
-  delay(10);
+  delay(100);
+  checkForQuit();
+  if(rawAccel.XAxis > 10000){
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+    }
+  if(rawAccel.XAxis < -10000){
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+  }
+  if(-9999<rawAccel.XAxis && 9999>rawAccel.XAxis){
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+  }
+  
 }
  
 // end of code.
