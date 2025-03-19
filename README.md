@@ -62,14 +62,48 @@ submarine movement works
 # Arduino Documentation
 **MOTOR1** = IN1, IN2
 **MOTOR2** = IN3, IN4
+
 Motors are **DC** motors:
+
   IN1 **LOW** + IN2 **HIGH** 
+  
     Move Forwards 
+    
   IN1 **HIGH** + IN2 **LOW**
+  
     Move Backwards
+    
   IN1 **LOW** + IN2 **LOW**
+  
     Stops motor
 
 MOTOR1 activates when sensor goes too much to the left
 
 MOTOR2 activates when sensor goes too much to the right
+
+***parts list***
+
+- DRV8833
+
+- MPU6050
+
+- waterproof motor
+
+- Acrylic glass
+
+- Electric epoxy sealant
+
+- Arduino UNO Rev3
+
+- ENC28J60 Ethernet Network Module Shield V2.0
+
+- Ethernet wire
+
+- Inductive charging 20W transmitter module
+
+- Inductive charging 7.5W receiver module
+
+- O-Rings
+  
+- DC 12V 5A Power Plug
+
