@@ -1,0 +1,70 @@
+#include <EtherCard.h>
+
+#define CS_PIN 10
+#define MOTOR_PIN 3  // Connected to motor driver input
+
+static byte myMac[] = { 0x74, 0x69, 0x69, 0x2D, 0x30, 0x01 };
+static byte myIp[] = { 192, 168, 1, 177 };
+static byte gwIp[] = { 192, 168, 1, 1 };
+static byte dnsIp[] = { 8, 8, 8, 8 };
+byte Ethernet::buffer[500];
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial);
+  
+  // Motor safety init
+  digitalWrite(MOTOR_PIN, LOW);
+  pinMode(MOTOR_PIN, OUTPUT);
+  digitalWrite(MOTOR_PIN, LOW); // Force motor OFF
+  delay(2000); // Critical stabilization delay
+
+  // Ethernet init
+  if (ether.begin(sizeof Ethernet::buffer, myMac, CS_PIN) == 0) {
+    Serial.println(F("Restart with motor DISCONNECTED!"));
+    while(1);
+  }
+  ether.staticSetup(myIp, gwIp, dnsIp);
+  
+  Serial.print(F("Ready! Control at http://"));
+  ether.printIp(myIp);
+}
+
+void loop() {
+  word len = ether.packetReceive();
+  word pos = ether.packetLoop(len);
+
+  if (pos) {
+    char* req = (char *)Ethernet::buffer + pos;
+    Serial.println(req); // Debug output
+
+    if (strstr(req, "GET /?ON")) {
+      digitalWrite(MOTOR_PIN, HIGH);
+      sendResponse("MOTOR ON");
+    }
+    else if (strstr(req, "GET /?OFF")) {
+      digitalWrite(MOTOR_PIN, LOW);
+      sendResponse("MOTOR OFF");
+    }
+    else {
+      sendResponse(digitalRead(MOTOR_PIN) ? "MOTOR ON" : "MOTOR OFF");
+    }
+  }
+}
+
+void sendResponse(const char* status) {
+  BufferFiller bfill = ether.tcpOffset();
+  bfill.emit_p(PSTR(
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/html\r\n"
+    "Connection: close\r\n"
+    "\r\n"
+    "<html><body>"
+    "<h1>Motor Control</h1>"
+    "<p>Status: <b>$S</b></p>"
+    "<a href='/?ON'><button style='background:#4CAF50'>ON</button></a>"
+    "<a href='/?OFF'><button style='background:#f44336'>OFF</button></a>"
+    "</body></html>"
+  ), status);
+  ether.httpServerReply(bfill.position());
+}
